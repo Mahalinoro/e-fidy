@@ -1,65 +1,104 @@
+'use client'
+
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import Image from "next/image";
+import Link from 'next/link'
+import { Wallet, LogOut, Vote } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAccount, useConnect, useDisconnect, useEnsAvatar, useEnsName } from 'wagmi'
 
 export default function Home() {
+  const { address, isConnected } = useAccount()
+  const { connectors, connect } = useConnect()
+  const { disconnect } = useDisconnect()
+  const { data: ensName } = useEnsName({ address })
+  const { data: ensAvatar } = useEnsAvatar({ name: ensName! })
+  const injectedConnector = connectors.find(
+    (c) => c.name === "Injected"
+  );
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+    <div className="bg-white dark:bg-black min-h-screen">
+      <div className="absolute top-4 right-4">
+        <ThemeSwitcher />
+      </div>
+      <div className="flex flex-col md:flex-row min-h-screen">
+        <div className="md:w-1/2 flex items-center justify-center p-8">
+          <div className="w-full h-full relative opacity-90">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src="/home-bg.jpg"
+              alt="Login Background"
+              layout="fill"
+              objectFit="cover"
+              className="rounded-lg shadow-lg"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
         </div>
-      </main>
+
+        <div className="md:w-1/2 flex items-center justify-center">
+          <div className="w-full max-w-md bg-white dark:bg-black p-8 ">
+            <div className="my-9">
+              <h1 className="text-center font-semibold text-xl">Tonga Soa !</h1>
+            </div>
+
+            <Link href="/manage">
+              <Button variant="outline" disabled={!isConnected} className="w-full border-[#52A5D8] bg-[#52A5D8] text-white hover:border-sky-200 hover:bg-sky-200 hover:text-white dark:border-[#52A5D8] dark:bg-[#52A5D8] dark:text-white dark:hover:border-sky-400 dark:hover:bg-sky-400 dark:hover:text-white mx-auto flex items-center my-6">
+                <Vote className="h-[1.2rem] w-[1.2rem] mr-2" />
+                Hifidy
+              </Button>
+            </Link>
+
+            {isConnected ? (
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  {ensAvatar ? (
+                    <Avatar>
+                      <AvatarImage src={ensAvatar} />
+                      <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <Avatar>
+                      <AvatarImage src="https://github.com/shadcn.png" />
+                      <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div className="text-left text-sm">
+                    <div className="font-medium text-black dark:text-white">
+                      {ensName ? ensName : `${address?.slice(0, 6)}...${address?.slice(-4)}`}
+                    </div>
+                    {ensName && (
+                      <div className="text-gray-500 dark:text-gray-400">
+                        {`${address?.slice(0, 6)}...${address?.slice(-4)}`}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full border-red-500 bg-red-500 text-white hover:border-red-400 hover:bg-red-400 hover:text-white dark:border-red-500 dark:bg-red-500 dark:text-white dark:hover:border-red-600 dark:hover:bg-red-600 dark:hover:text-white mx-auto flex items-center"
+                  onClick={() => disconnect()}
+                >
+                  <LogOut className="h-[1.2rem] w-[1.2rem] mr-2" />
+                  Disconnect
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full border-gray-500 bg-gray-500 text-white hover:border-gray-400 hover:bg-gray-400 hover:text-white dark:border-gray-500 dark:bg-gray-500 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white mx-auto flex items-center"
+                onClick={() => injectedConnector && connect({ connector: injectedConnector })}
+                disabled={!injectedConnector}
+              >
+                <Wallet className="h-[1.2rem] w-[1.2rem] mr-2" />
+                {injectedConnector ? "Connect Wallet" : "Wallet Not Found"}
+              </Button>
+            )}
+
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+
